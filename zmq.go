@@ -44,7 +44,7 @@ func BindPublisher(endpoint string) *GlcZmq {
         log.Fatal(err)
     }
 	
-	return GlcZmq{socket}
+	return &GlcZmq{socket}
 }
 
 func BindSubscriber(endpoint string, filter string, callback func(message string)) *zmq.Socket {
@@ -71,7 +71,7 @@ func BindSubscriber(endpoint string, filter string, callback func(message string
 		}
 	}
 	
-	return GlcZmq{socket}
+	return &GlcZmq{socket}
 }
 
 func PublishMessage(message string, socket *GlcZmq) {
