@@ -47,7 +47,7 @@ func BindPublisher(endpoint string) *GlcZmq {
 	return &GlcZmq{socket}
 }
 
-func BindSubscriber(endpoint string, filter string, callback func(message string)) *zmq.Socket {
+func BindSubscriber(endpoint string, filter string, callback func(message string)) *GlcZmq {
 	socket, err := zmq.NewSocket(zmq.PUB)
 	defer socket.Close()
 	
