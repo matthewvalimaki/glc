@@ -26,7 +26,7 @@ func BindProxy(frontend string, backend string) {
 	if err != nil {
         log.Fatal(err)
     }
-
+	
 	err = zmq.Proxy(xSub, xPub, nil)
 	
 	log.Fatalln("Proxy interrupted:", err)
@@ -34,22 +34,25 @@ func BindProxy(frontend string, backend string) {
 
 func BindPublisher(endpoint string) *GlcZmq {
 	socket, err := zmq.NewSocket(zmq.PUB)
-	defer socket.Close()
 	
 	if err != nil {
-        log.Fatal(err)
-    }
+		log.Fatal(err)
+	}
 	
-	err = socket.Connect(endpoint)
+	go func(socket *zmq.Socket, endpoint string) {	
+		defer socket.Close()
+		err = socket.Connect(endpoint)
+		
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		for {
+			// infinity
+		}
+	}(socket, endpoint)
 	
-	if err != nil {
-        log.Fatal(err)
-    }
-	
-	test := &GlcZmq{socket}
-	PublishMessage("test", test)
-	
-	return test
+	return &GlcZmq{socket}
 }
 
 func BindSubscriber(endpoint string, filter string, callback func(message string)) *GlcZmq {
@@ -78,5 +81,11 @@ func BindSubscriber(endpoint string, filter string, callback func(message string
 }
 
 func PublishMessage(message string, glcZqm *GlcZmq) {
+	glcZqm.Socket.Send(message, zmq.DONTWAIT)
+}
+
+// Publish with a topic so that filtering can be done
+func PublishMessageWithTopic(topic string, message string, glcZqm *GlcZmq) {
+	glcZqm.Socket.Send(topic, zmq.SNDMORE)
 	glcZqm.Socket.Send(message, zmq.DONTWAIT)
 }
