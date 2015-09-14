@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+type GlcZmq struct {
+	Socket *zmq.Socket
+}
+
 func BindProxy(frontend string, backend string) {
 	// create XSUB for publishers to connect to
 	xSub, _ := zmq.NewSocket(zmq.XSUB)
@@ -26,7 +30,7 @@ func BindProxy(frontend string, backend string) {
 	log.Fatalln("Proxy interrupted:", err)
 }
 
-func BindPublisher(endpoint string) *zmq.Socket {
+func BindPublisher(endpoint string) *GlcZmq {
 	socket, err := zmq.NewSocket(zmq.PUB)
 	defer socket.Close()
 	
@@ -40,7 +44,7 @@ func BindPublisher(endpoint string) *zmq.Socket {
         log.Fatal(err)
     }
 	
-	return socket
+	return GlcZmq{socket}
 }
 
 func BindSubscriber(endpoint string, filter string, callback func(message string)) *zmq.Socket {
@@ -67,9 +71,9 @@ func BindSubscriber(endpoint string, filter string, callback func(message string
 		}
 	}
 	
-	return socket
+	return GlcZmq{socket}
 }
 
-func PublishMessage(message string, socket *zmq.Socket) {
-	socket.Send(message, zmq.DONTWAIT)
+func PublishMessage(message string, socket *GlcZmq) {
+	GlcZmq.Socket.Send(message, zmq.DONTWAIT)
 }
