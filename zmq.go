@@ -30,9 +30,11 @@ func BindProxy(frontend string, backend string) {
 	log.Fatalln("Proxy interrupted:", err)
 }
 
-func BindPublisher(endpoint string) *GlcZmq {
+func BindPublisher(endpoint string, filter string) *GlcZmq {
 	socket, err := zmq.NewSocket(zmq.PUB)
 	defer socket.Close()
+	
+	socket.SetSubscribe(filter)
 	
 	if err != nil {
         log.Fatal(err)
