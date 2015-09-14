@@ -9,13 +9,10 @@ type GlcZmq struct {
 	Socket *zmq.Socket
 }
 
-func BindProxy(frontend string, backend string, filter string) {
+func BindProxy(frontend string, backend string) {
 	// create XSUB for publishers to connect to
 	xSub, _ := zmq.NewSocket(zmq.XSUB)
 	defer xSub.Close()
-	
-	xSub.SetSubscribe(filter)
-	
 	err := xSub.Bind(frontend)
 	if err != nil {
         log.Fatal(err)
@@ -24,12 +21,14 @@ func BindProxy(frontend string, backend string, filter string) {
 	// create XPUB for subscribers to connect to
 	xPub, _ := zmq.NewSocket(zmq.XPUB)
 	defer xPub.Close()
+	
 	err = xPub.Bind(backend)
 	if err != nil {
         log.Fatal(err)
     }
 
 	err = zmq.Proxy(xSub, xPub, nil)
+	
 	log.Fatalln("Proxy interrupted:", err)
 }
 
@@ -47,7 +46,10 @@ func BindPublisher(endpoint string) *GlcZmq {
         log.Fatal(err)
     }
 	
-	return &GlcZmq{socket}
+	test := &GlcZmq{socket}
+	PublishMessage("test", test)
+	
+	return test
 }
 
 func BindSubscriber(endpoint string, filter string, callback func(message string)) *GlcZmq {
