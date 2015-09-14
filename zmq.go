@@ -37,8 +37,6 @@ func BindPublisher(endpoint string) *GlcZmq {
 	socket, err := zmq.NewSocket(zmq.PUB)
 	defer socket.Close()
 	
-	socket.SetSubscribe(filter)
-	
 	if err != nil {
         log.Fatal(err)
     }
