@@ -74,6 +74,6 @@ func BindSubscriber(endpoint string, filter string, callback func(message string
 	return &GlcZmq{socket}
 }
 
-func PublishMessage(message string, socket *GlcZmq) {
-	GlcZmq.Socket.Send(message, zmq.DONTWAIT)
+func PublishMessage(message string, glcZqm *GlcZmq) {
+	glcZqm.Socket.Send(message, zmq.DONTWAIT)
 }
