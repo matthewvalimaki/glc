@@ -3,6 +3,7 @@ package glc
 import (
 	zmq "github.com/pebbe/zmq4"
 	"log"
+	"time"
 )
 
 type GlcZmq struct {
@@ -10,16 +11,22 @@ type GlcZmq struct {
 }
 
 func BindProxy(frontend string, backend string) {
+	context, err := zmq.NewContext()
+	
+	if err != nil {
+        log.Fatal(err)
+    }
+	
 	// create XSUB for publishers to connect to
-	xSub, _ := zmq.NewSocket(zmq.XSUB)
+	xSub, _ := context.NewSocket(zmq.XSUB)
 	defer xSub.Close()
-	err := xSub.Bind(frontend)
+	err = xSub.Bind(frontend)
 	if err != nil {
         log.Fatal(err)
     }
 	
 	// create XPUB for subscribers to connect to
-	xPub, _ := zmq.NewSocket(zmq.XPUB)
+	xPub, _ := context.NewSocket(zmq.XPUB)
 	defer xPub.Close()
 	
 	err = xPub.Bind(backend)
@@ -33,7 +40,13 @@ func BindProxy(frontend string, backend string) {
 }
 
 func BindPublisher(endpoint string) *GlcZmq {
-	socket, err := zmq.NewSocket(zmq.PUB)
+	context, err := zmq.NewContext()
+	
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	socket, err := context.NewSocket(zmq.PUB)
 	
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +61,7 @@ func BindPublisher(endpoint string) *GlcZmq {
 		}
 		
 		for {
-			// infinity
+			time.Sleep(1 * time.Second)
 		}
 	}(socket, endpoint)
 	
@@ -56,7 +69,9 @@ func BindPublisher(endpoint string) *GlcZmq {
 }
 
 func BindSubscriber(endpoint string, filter string, callback func(message string)) *GlcZmq {
-	socket, err := zmq.NewSocket(zmq.PUB)
+	context, err := zmq.NewContext()
+	
+	socket, err := context.NewSocket(zmq.PUB)
 	defer socket.Close()
 	
 	if err != nil {
